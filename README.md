@@ -65,5 +65,4 @@ POST /api/predict
 - Cloud deployment with authentication
 - Mobile app development
 
-## Repository
-https://github.com/agrim7070/python-project.git
+
