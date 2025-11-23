@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HealthAI — Pro Dashboard (Final)</title>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ========= THEME VARIABLES ========= */
+:root{
+  --bg:#071428;
+  --panel:#0b1720;
+  --muted:#9cb8c0;
+  --text:#e9faff;
+  --glass:rgba(255,255,255,0.03);
+  --accent1:#00e0ff;
+  --accent2:#7affb5;
+  --shadow:0 10px 40px rgba(0,0,0,0.22);
+  --radius:14px;
+  --fast:220ms cubic-bezier(.2,.9,.3,1);
+}
+
+/* LIGHT THEME */
+html.light {
+  --bg:linear-gradient(180deg,#f4f9ff,#e8f3ff);
+  --panel:#ffffff;
+  --text:#032a30;
+  --muted:#516a70;
+  --glass:rgba(0,0,0,0.06);
+}
+
+/* ========= GLOBAL ========= */
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Poppins",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:20px;
+  display:flex;
+  min-height:100vh;
+}
+
+/* ========= LAYOUT ========= */
+.app{
+  display:flex;
+  gap:18px;
+  width:100%;
+  align-items:flex-start;
+}
+
+/* ========= SIDEBAR ========= */
+.sidebar{
+  width:250px;
+  padding:16px;
+  background:var(--panel);
+  border-radius:var(--radius);
+  border:1px solid var(--glass);
+  box-shadow:var(--shadow);
+  height:calc(100vh - 40px);
+  position:sticky;
+  top:20px;
+  display:flex;
+  flex-direction:column;
+}
+
+.logoBox{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.logo{
+  width:48px;height:48px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  display:grid;
+  place-items:center;
+  color:#022729;
+  font-weight:800;
+  box-shadow:0 6px 20px rgba(0,224,255,0.3);
+}
+
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:18px;
+}
+
+.nav button{
+  background:transparent;
+  border:none;
+  padding:10px 12px;
+  border-radius:10px;
+  color:var(--muted);
+  font-weight:600;
+  text-align:left;
+  cursor:pointer;
+  transition:var(--fast);
+}
+
+.nav button:hover{
+  transform:translateX(8px);
+  color:var(--text);
+}
+
+.nav .active{
+  background:linear-gradient(90deg,rgba(0,224,255,0.12),rgba(122,255,181,0.08));
+  border:1px solid rgba(0,224,255,0.12);
+  color:var(--text);
+}
+
+/* ========= MAIN ========= */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* WAVE HEADER */
+.header{
+  height:120px;
+  border-radius:var(--radius);
+  background:var(--panel);
+  border:1px solid var(--glass);
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.header h1{
+  margin:0;
+  font-size:22px;
+  font-weight:700;
+}
+
+.header .sub{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.header svg{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:260px;
+  opacity:0.9;
+}
+
+/* ========= CARDS ========= */
+.card{
+  background:var(--panel);
+  border-radius:var(--radius);
+  border:1px solid var(--glass);
+  padding:16px;
+  box-shadow:var(--shadow);
+  transition:var(--fast);
+}
+
+.card:hover{
+  transform:translateY(-6px);
+}
+
+/* ========= GRID ========= */
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+
+@media(max-width:900px){
+  .grid-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .grid-3{grid-template-columns:1fr;}
+}
+
+/* =====================================
+   FIXED + IMPROVED FLOATING LABEL FORM
+   ===================================== */
+.form{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:16px;
+}
+@media(max-width:700px){
+  .form{grid-template-columns:1fr;}
+}
+
+.field{
+  position:relative;
+  display:flex;
+  flex-direction:column-reverse; /* ensures label alignment */
+}
+
+.field input{
+  width:100%;
+  padding:18px 12px 6px 12px; /* top padding to allow floating label */
+  border-radius:10px;
+  border:1px solid var(--glass);
+  background:rgba(255,255,255,0.02);
+  color:var(--text);
+  font-size:14px;
+  transition:var(--fast);
+}
+
+.field input:focus{
+  outline:none;
+  border-color:var(--accent1);
+  box-shadow:0 6px 20px rgba(0,224,255,0.15);
+  transform:translateY(-2px);
+}
+
+.field label{
+  position:absolute;
+  left:12px;
+  top:18px; /* fixed alignment */
+  pointer-events:none;
+  font-size:14px;
+  color:var(--muted);
+  transition:var(--fast);
+}
+
+.field input:not(:placeholder-shown) + label,
+.field input:focus + label{
+  transform:translateY(-30px) scale(0.92);
+  color:var(--accent1);
+}
+
+/* BUTTON */
+.primaryBtn{
+  grid-column:1/-1;
+  padding:14px 16px;
+  background:linear-gradient(135deg,var(--accent1),var(--accent2));
+  border:none;
+  font-weight:700;
+  color:#022a2e;
+  cursor:pointer;
+  border-radius:12px;
+  transition:var(--fast);
+}
+
+.primaryBtn:hover{
+  transform:translateY(-3px);
+  box-shadow:0 12px 22px rgba(0,224,255,0.25);
+}
+
+/* RESULT BOX */
+.resultBox{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--glass);
+  margin-top:10px;
+}
+
+.status{
+  padding:6px 12px;
+  border-radius:8px;
+  font-weight:700;
+}
+
+.status.low{
+  background:rgba(122,255,181,0.15);
+  color:#7affb5;
+}
+
+.status.high{
+  background:rgba(255,77,110,0.15);
+  color:#ff6f89;
+}
+
+/* Records table */
+.table{ width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; }
+.table th, .table td{ padding:10px 8px; text-align:left; color:var(--muted); border-bottom:1px dashed rgba(255,255,255,0.02); }
+.table th{ color:var(--text); font-weight:700; }
+
+/* Shimmer */
+.shimmer{ position:relative; overflow:hidden; background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04)); }
+.shimmer::after{ content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.12), rgba(255,255,255,0.02)); animation:shimmer 1.3s infinite; }
+@keyframes shimmer{ to{ transform:translateX(100%) } }
+
+/* small responsive tweaks */
+@media (max-width:520px){
+  .header{height:100px;padding:12px}
+  .logo{height:40px;width:40px}
+}
+
+/* minor utilities */
+.small{ font-size:13px; color:var(--muted); }
+.sub{ font-size:13px; color:var(--muted); margin-top:6px; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Sidebar">
+    <div class="logoBox">
+      <div class="logo">HI</div>
+      <div>
+        <div style="font-weight:700">HealthAI</div>
+        <div class="small">ML Diagnosis</div>
+      </div>
+    </div>
+
+    <nav class="nav" role="navigation" aria-label="Main">
+      <button class="active" data-tab="diagnosis">Diagnosis</button>
+      <button data-tab="records">Records</button>
+      <button data-tab="analytics">Analytics</button>
+      <button data-tab="admin">Admin</button>
+    </nav>
+
+    <div style="flex:1"></div>
+
+    <div class="small">Theme</div>
+    <button id="themeBtn" style="padding:8px;border-radius:10px;border:1px solid var(--glass);background:transparent;color:var(--muted);cursor:pointer">Toggle Light/Dark</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Wave Header -->
+    <div class="header">
+      <div>
+        <h1>HealthAI Dashboard</h1>
+        <div class="sub">Enterprise-level health risk prediction system</div>
+      </div>
+
+      <svg viewBox="0 0 600 120" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gradWave" x1="0" x2="1">
+            <stop offset="0" stop-color="#00e0ff"/>
+            <stop offset="1" stop-color="#7affb5"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 40 C150 0 350 80 600 40 L600 120 L0 120 Z" fill="url(#gradWave)" opacity="0.08">
+          <animateTransform attributeName="transform" type="translate" values="0 0; 10 4; 0 0" dur="6s" repeatCount="indefinite"></animateTransform>
+        </path>
+      </svg>
+    </div>
+
+    <!-- TOP CARDS: Accuracy, Trend, Recent -->
+    <div class="grid-3">
+      <div class="card">
+        <h4 style="margin:0">Model Accuracy</h4>
+        <div class="sub">Based on test dataset</div>
+        <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div id="accVal" style="font-size:20px; font-weight:700">—</div>
+          <div style="width:55%">
+            <div style="height:12px; background:rgba(255,255,255,0.04); border-radius:8px; overflow:hidden;">
+              <div id="accBar" style="height:100%; width:0%; background:linear-gradient(90deg,#00e0ff,#7affb5); transition:.6s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 style="margin:0">Monthly Trend</h4>
+        <div class="sub">Positive cases</div>
+        <div style="height:90px; margin-top:8px;">
+          <canvas id="miniTrend"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 style="margin:0">Recent</h4>
+        <div class="sub">Last prediction details</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:10px">
+          <div id="recentAvatar" style="width:50px;height:50px;border-radius:10px;background:linear-gradient(135deg,#00e0ff,#7affb5); display:grid; place-items:center; font-weight:700; color:#062222;">A</div>
+          <div>
+            <div id="recentName" style="font-weight:700">—</div>
+            <div id="recentMeta" class="sub">—</div>
+          </div>
+          <div style="margin-left:auto;text-align:right;">
+            <div id="recentStatus" class="status low">—</div>
+            <div id="recentProb" class="sub">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <!-- DIAGNOSIS -->
+    <div id="tab-diagnosis" class="card">
+      <h3>Patient Diagnosis</h3>
+      <div class="sub">Enter patient vitals & run ML prediction</div>
+
+      <form id="predictForm" style="margin-top:16px;">
+        <div class="form">
+
+          <div class="field">
+            <input id="name" name="name" placeholder=" " required>
+            <label>Full Name</label>
+          </div>
+
+          <div class="field">
+            <input id="glucose" name="glucose" type="number" placeholder=" " value="120">
+            <label>Glucose</label>
+          </div>
+
+          <div class="field">
+            <input id="bloodpressure" name="bloodpressure" type="number" placeholder=" " value="80">
+            <label>Blood Pressure</label>
+          </div>
+
+          <div class="field">
+            <input id="skinthickness" name="skinthickness" type="number" placeholder=" " value="25">
+            <label>Skin Thickness</label>
+          </div>
+
+          <div class="field">
+            <input id="insulin" name="insulin" type="number" placeholder=" " value="85">
+            <label>Insulin</label>
+          </div>
+
+          <div class="field">
+            <input id="bmi" name="bmi" type="number" placeholder=" " value="27.3" step="0.1">
+            <label>BMI</label>
+          </div>
+
+          <div class="field">
+            <input id="pedigree" name="pedigree" type="number" placeholder=" " value="0.52" step="0.01">
+            <label>Diabetes Pedigree</label>
+          </div>
+
+          <div class="field">
+            <input id="age" name="age" type="number" placeholder=" " value="35">
+            <label>Age</label>
+          </div>
+
+          <button type="submit" class="primaryBtn">Run Prediction</button>
+        </div>
+      </form>
+
+      <div id="resultArea" style="display:none; margin-top:16px;">
+        <div class="resultBox">
+          <div>
+            <div id="resultLabel" style="font-weight:700">Health Risk: —</div>
+            <div id="resultSub" class="sub">Probability —</div>
+          </div>
+          <div style="width:34%">
+            <canvas id="resultChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECORDS -->
+    <div id="tab-records" class="card" style="display:none;">
+      <h3>Records</h3>
+      <div class="sub">All stored predictions</div>
+
+      <div style="margin-top:14px; max-height:350px; overflow:auto;">
+        <table class="table" id="recordsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Glucose</th>
+              <th>BMI</th>
+              <th>Prediction</th>
+              <th>Probability</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" style="text-align:center;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button id="exportBtn" class="primaryBtn" style="margin-top:12px; background:transparent; border:1px solid var(--glass); color:var(--muted);">
+        Export CSV
+      </button>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="tab-analytics" class="card" style="display:none;">
+      <h3>Analytics</h3>
+      <div class="sub">Chart-based insights</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
+        <div class="card shimmer">
+          <h4>Positive Trend</h4>
+          <div style="height:200px;"><canvas id="lineChart"></canvas></div>
+        </div>
+
+        <div class="card shimmer">
+          <h4>Monthly Breakdown</h4>
+          <div style="height:200px;"><canvas id="barChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="tab-admin" class="card" style="display:none;">
+      <h3>Admin</h3>
+      <div class="sub">Quick stats</div>
+
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:14px;">
+        <div class="card" style="padding:10px;"><div class="sub">Total</div><div id="statTotal" style="font-weight:700">—</div></div>
+        <div class="card" style="padding:10px;"><div class="sub">Positive</div><div id="statPos" style="font-weight:700">—</div></div>
+        <div class="card" style="padding:10px;"><div class="sub">Negative</div><div id="statNeg" style="font-weight:700">—</div></div>
+      </div>
+
+      <button id="createDemo" class="primaryBtn" style="margin-top:16px;">Create Demo Data</button>
+    </div>
+
+    <div class="sub" style="margin-top:18px; opacity:0.8;">Single-file demo • Works standalone or with Flask backend endpoints: <code>/api/predict</code>, <code>/api/records</code>, <code>/api/stats</code></div>
+
+  </main>
+</div>
+
+<!-- ========== SCRIPT (all JS) ========== -->
+<script>
+/* Small helper $ selectors */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+/* Elements & guards */
+const themeBtn = $('#themeBtn');
+const navButtons = $$('.nav button') || [];
+const exportBtn = $('#exportBtn');
+const createDemoBtn = $('#createDemo');
+const predictForm = $('#predictForm');
+const resultArea = $('#resultArea');
+const miniTrendEl = $('#miniTrend');
+const resultChartEl = $('#resultChart');
+const lineChartEl = $('#lineChart');
+const barChartEl = $('#barChart');
+const recordsTableBody = $('#recordsTable tbody');
+const accVal = $('#accVal');
+const accBar = $('#accBar');
+const recentAvatar = $('#recentAvatar');
+const recentName = $('#recentName');
+const recentMeta = $('#recentMeta');
+const recentStatus = $('#recentStatus');
+const recentProb = $('#recentProb');
+const resultLabel = $('#resultLabel');
+const resultSub = $('#resultSub');
+
+/* Chart instances */
+let miniTrend, resultDough, lineChart, barChart;
+
+/* Initialize charts */
+function initCharts(){
+  try {
+    if(miniTrendEl){
+      const ctx = miniTrendEl.getContext('2d');
+      miniTrend = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ data: [], borderColor: '#00e0ff', tension: 0.3, fill:false }] },
+        options: { plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{display:false}} }
+      });
+    }
+  } catch(e){ console.warn('miniTrend init failed', e); }
+
+  try {
+    if(resultChartEl){
+      const ctx = resultChartEl.getContext('2d');
+      resultDough = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: ['Risk','Safe'], datasets: [{ data: [0.5,0.5], backgroundColor: ['#00e0ff','#123'] }] },
+        options: { cutout: '70%', plugins:{legend:{display:false}} }
+      });
+    }
+  } catch(e){ console.warn('resultDough init failed', e); }
+
+  try {
+    if(lineChartEl){
+      const ctx = lineChartEl.getContext('2d');
+      lineChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label:'Positives', data: [], borderColor: '#00e0ff', tension: 0.3, fill:false }] },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+  } catch(e){ console.warn('lineChart init failed', e); }
+
+  try {
+    if(barChartEl){
+      const ctx = barChartEl.getContext('2d');
+      barChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label:'Monthly positive', data: [], backgroundColor: '#7affb5' }] },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+  } catch(e){ console.warn('barChart init failed', e); }
+}
+initCharts();
+
+/* Theme toggle */
+(function setupTheme(){
+  if(!themeBtn) return;
+  const stored = localStorage.getItem('theme');
+  if(stored === 'light') document.documentElement.classList.add('light');
+  themeBtn.addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    themeBtn.style.transform = 'translateY(-2px)';
+    setTimeout(()=> themeBtn.style.transform = '', 160);
+  });
+})();
+
+/* Tabs */
+(function setupTabs(){
+  if(!navButtons.length) return;
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const key = btn.dataset.tab;
+      document.querySelectorAll('[id^="tab-"]').forEach(p => p.style.display = 'none');
+      const pane = document.getElementById('tab-' + key);
+      if(pane) pane.style.display = 'block';
+      $$('.shimmer').forEach(s => s.classList.remove('shimmer'));
+    });
+  });
+})();
+
+/* Safe fetch wrapper */
+async function safeFetchJSON(url, opts){
+  try{
+    const r = await fetch(url, opts);
+    if(!r.ok) throw new Error('Network error');
+    return await r.json();
+  }catch(e){ throw e; }
+}
+
+/* Apply stats */
+function applyStats(s){
+  try{
+    if(accVal) accVal.textContent = Math.round((s.accuracy||0)*100) + '%';
+    if(accBar) accBar.style.width = ((s.accuracy||0)*100) + '%';
+    if(lineChart && s.trend){ lineChart.data.labels = s.trend.labels; lineChart.data.datasets[0].data = s.trend.data; lineChart.update(); }
+    if(barChart && s.months){ barChart.data.labels = s.months.labels; barChart.data.datasets[0].data = s.months.data; barChart.update(); }
+    if(miniTrend && s.trend){ miniTrend.data.labels = s.trend.labels; miniTrend.data.datasets[0].data = s.trend.data; miniTrend.update(); }
+    const elTotal = $('#statTotal'), elPos = $('#statPos'), elNeg = $('#statNeg');
+    if(elTotal) elTotal.textContent = s.total || 0;
+    if(elPos) elPos.textContent = s.positive || 0;
+    if(elNeg) elNeg.textContent = s.negative || 0;
+  }catch(err){ console.warn('applyStats error', err); }
+}
+
+/* Load stats */
+async function loadStats(){
+  try{
+    const s = await safeFetchJSON('/api/stats');
+    applyStats(s);
+  }catch(e){
+    const demo = { total:128, positive:34, negative:94, accuracy:0.924, trend:{labels:['W1','W2','W3','W4'],data:[5,8,9,12]}, months:{labels:['Jul','Aug','Sep','Oct'],data:[8,12,9,15]} };
+    applyStats(demo);
+  }
+}
+
+/* Render records */
+function renderRecords(rows){
+  if(!recordsTableBody) return;
+  recordsTableBody.innerHTML = '';
+  if(!rows || !rows.length){
+    recordsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center">No records</td></tr>';
+    return;
+  }
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td><td>${r.age}</td><td>${r.glucose}</td><td>${r.bmi}</td><td>${r.prediction? 'Positive':'Negative'}</td><td>${(r.probability*100).toFixed(1)}%</td><td>${r.timestamp||'-'}</td>`;
+    recordsTableBody.appendChild(tr);
+  });
+}
+
+/* Load records */
+async function loadRecords(){
+  if(!recordsTableBody) return;
+  recordsTableBody.innerHTML = '<tr><td colspan="7" style="text-align:center">Loading…</td></tr>';
+  try{
+    const rows = await safeFetchJSON('/api/records');
+    renderRecords(rows);
+  }catch(e){
+    const demo = [{name:'Aman',age:42,glucose:150,bmi:28,prediction:1,probability:0.72,timestamp:'2025-11-10'},{name:'Ritu',age:29,glucose:98,bmi:22,prediction:0,probability:0.18,timestamp:'2025-11-12'}];
+    renderRecords(demo);
+  }
+}
+
+/* Prediction simulation fallback */
+function simulateScore(payload){
+  const score = (payload.glucose/200)*0.35 + (payload.bloodpressure/180)*0.15 + (payload.bmi/50)*0.25 + payload.pedigree*0.25;
+  const p = Math.min(0.97, Math.max(0.03, score));
+  return { prediction: p>=0.5 ? 1 : 0, probability: p };
+}
+
+/* Handle prediction response */
+function handlePredictionResponse(resp, payload){
+  const pred = Number(resp.prediction);
+  const prob = Number(resp.probability);
+  const label = pred === 1 ? 'HIGH' : 'LOW';
+
+  if(resultLabel) resultLabel.textContent = 'Health Risk: ' + label;
+  if(resultSub) resultSub.textContent = 'Probability: ' + (prob*100).toFixed(1) + '%';
+  if(resultDough) { resultDough.data.datasets[0].data = [prob, 1-prob]; resultDough.update(); }
+
+  if(recentAvatar) recentAvatar.textContent = payload.name ? payload.name.charAt(0).toUpperCase() : 'A';
+  if(recentName) recentName.textContent = payload.name || '-';
+  if(recentMeta) recentMeta.textContent = 'Age: ' + (payload.age || '-') + ' • BMI: ' + (payload.bmi || '-');
+  if(recentProb) recentProb.textContent = (prob*100).toFixed(1) + '%';
+  if(recentStatus) { recentStatus.textContent = label; recentStatus.className = 'status ' + (label === 'LOW' ? 'low' : 'high'); }
+}
+
+/* Prediction form submit */
+if(predictForm){
+  predictForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(predictForm).entries());
+    const payload = {
+      name: (data.name || '').trim(),
+      glucose: Number(data.glucose) || 120,
+      bloodpressure: Number(data.bloodpressure) || 80,
+      skinthickness: Number(data.skinthickness) || 25,
+      insulin: Number(data.insulin) || 85,
+      bmi: Number(data.bmi) || 27.3,
+      pedigree: Number(data.pedigree) || 0.5,
+      age: Number(data.age) || 35
+    };
+
+    if(resultLabel) resultLabel.textContent = 'Predicting…';
+    if(resultSub) resultSub.textContent = 'Contacting model';
+    if(resultArea) resultArea.style.display = 'block';
+    if(resultDough) { resultDough.data.datasets[0].data = [0.5,0.5]; resultDough.update(); }
+
+    try{
+      const res = await fetch('/api/predict', { method: 'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload) });
+      if(!res.ok) throw new Error('Network');
+      const rjson = await res.json();
+      handlePredictionResponse(rjson, payload);
+      loadRecords(); loadStats();
+    }catch(err){
+      const s = simulateScore(payload);
+      handlePredictionResponse(s, payload);
+    }
+  });
+}
+
+/* Export CSV */
+if(exportBtn){
+  exportBtn.addEventListener('click', async () => {
+    try{
+      const rows = await safeFetchJSON('/api/records');
+      const csv = ['name,age,glucose,bmi,prediction,probability,timestamp', ...rows.map(r => `${r.name},${r.age},${r.glucose},${r.bmi},${r.prediction? 'Positive':'Negative'},${r.probability},${r.timestamp||''}`)];
+      const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'records.csv'; a.click(); URL.revokeObjectURL(url);
+    }catch(e){
+      alert('Export failed (backend not available).');
+    }
+  });
+}
+
+/* Create demo data */
+if(createDemoBtn){
+  createDemoBtn.addEventListener('click', async () => {
+    try{
+      const r = await fetch('/create_demo', { method:'POST' });
+      if(r.ok){ alert('Demo data created'); loadRecords(); loadStats(); } else alert('Create demo failed');
+    }catch(e){ alert('Backend not available'); }
+  });
+}
+
+/* Initial load */
+loadStats();
+loadRecords();
+
+/* Remove shimmer after a short delay */
+setTimeout(()=> $$('.shimmer').forEach(s => s.classList.remove('shimmer')), 750);
+
+console.log('HealthAI dashboard loaded.');
+</script>
+
+</body>
+</html>

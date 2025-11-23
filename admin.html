@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin — Annie</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>🌼 Annie Admin Dashboard</h1>
+      <p>Total predictions: {{ stats.total }}</p>
+      <p>Total positives: {{ stats.positives }}</p>
+      <canvas id="dailyChart" width="400" height="200"></canvas>
+      <script>
+        const daily = {{ stats.daily|tojson }};
+        const labels = daily.map(r => r[0]);
+        const counts = daily.map(r => r[1]);
+        const ctx = document.getElementById('dailyChart').getContext('2d');
+        new Chart(ctx, {type:'bar', data:{labels:labels, datasets:[{label:'Predictions per day', data:counts}]}});
+      </script>
+      <a href="/logout">Logout</a>
+    </div>
+  </body>
+</html>
