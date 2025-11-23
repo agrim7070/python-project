@@ -1,6 +1,5 @@
-# AI Health Diagnosis Assistant — Cutie Auto Edition
-
-## How it works
+# AI Health Diagnosis Assistant —  
+# How it works
 - Run `python app.py` in VS Code.
 - If a trained model isn't present, the app will attempt to download the Kaggle dataset (if you've configured kaggle.json).
 - If Kaggle is not configured or internet is unavailable, the app will train using the bundled local CSV (offline-safe).
